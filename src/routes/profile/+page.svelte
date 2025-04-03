@@ -22,14 +22,16 @@
     async function updateUser() {
         try {
             await apiRequest('/user/protected/update', 'PUT', { username, email });
-            $user.username = $user.username;
-            $user.email = $user.email;
+            $user.username = username;
+            $user.email = email;
             success = 'User updated successfully';
             error = null;
         } catch (err) {
             error = err.detail || 'Update failed';
             success = null;
         }
+
+        return false;
     }
 </script>
 
@@ -42,7 +44,7 @@
     <Alert color="danger">{error}</Alert>
 {/if}
 
-<Form on:submit|preventDefault={updateUser}>
+<Form on:submit={() => updateUser()}>
     <FormGroup>
         <Label for="username">Username</Label>
         <Input type="text" id="username" name="username" bind:value={username} required />

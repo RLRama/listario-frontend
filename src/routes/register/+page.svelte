@@ -11,10 +11,12 @@
     async function register() {
         try {
             await apiRequest('/user/register', 'POST', { username, email, password });
-            goto('/login');
+            await goto('/login');
         } catch (e) {
             error = e.detail || 'Registration failed';
         }
+
+        return false;
     }
 </script>
 
@@ -24,7 +26,7 @@
     <Alert color="danger">{error}</Alert>
 {/if}
 
-<Form on:submit|preventDefault={register}>
+<Form on:submit={() => register()}>
     <FormGroup>
         <Label for="username">Username</Label>
         <Input type="text" id="username" name="username" bind:value={username} required />

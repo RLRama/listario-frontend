@@ -11,10 +11,12 @@
             await apiRequest('/user/login', 'POST', { identifier, password });
             const userData = await apiRequest('/user/protected/me');
             user.set(userData);
-            goto('/');
+            await goto('/');
         } catch (err) {
             error = err.detail || 'Login failed';
         }
+
+        return false;
     }
 </script>
 
@@ -22,7 +24,7 @@
     <Alert color="danger">{error}</Alert>
 {/if}
 
-<Form on:submit|preventDefault={login}>
+<Form on:submit={() => login()}>
     <FormGroup>
         <Label for="identifier">Username or email</Label>
         <Input type="text" id="identifier" name="identifier" bind:value={identifier} required />
