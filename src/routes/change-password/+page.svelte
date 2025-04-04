@@ -2,6 +2,8 @@
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {Alert, Button, Form, FormGroup, Input, Label} from "@sveltestrap/sveltestrap";
+    import {user} from "$lib/stores.js";
+    import {apiRequest} from "$lib/api.js";
 
     let currentPassword = '';
     let newPassword = '';
@@ -16,6 +18,7 @@
 
     async function updatePassword() {
         try {
+            console.log("Attempting to update password");
             await apiRequest('/user/protected/update-password', 'PUT', {
                 current_password: currentPassword,
                 new_password: newPassword,
@@ -23,7 +26,8 @@
             success = 'Password updated successfully.';
             error = null;
         } catch (e) {
-            error = e.detail || 'Password update failed';
+            console.error("Password update failed: ", e);
+            error = e.detail || e.message || 'Password update failed';
             success = null;
         }
 

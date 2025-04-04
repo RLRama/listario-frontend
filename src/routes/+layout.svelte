@@ -3,6 +3,7 @@
     import {onMount} from "svelte";
     import {apiRequest} from "$lib/api.js";
     import Nav from "$lib/Nav.svelte";
+    import {user} from "$lib/stores.js";
 
     onMount(async () => {
         try {

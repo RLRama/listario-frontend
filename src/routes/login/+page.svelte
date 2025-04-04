@@ -1,6 +1,8 @@
 <script>
     import {goto} from "$app/navigation";
     import {Alert, Button, Form, FormGroup, Input, Label} from "@sveltestrap/sveltestrap";
+    import {apiRequest} from "$lib/api.js";
+    import {user} from "$lib/stores.js";
 
     let identifier = '';
     let password = '';
@@ -8,12 +10,18 @@
 
     async function login() {
         try {
-            await apiRequest('/user/login', 'POST', { identifier, password });
+            console.log("Attempting to login: ", { identifier, password: "***" });
+            const loginResponse = await apiRequest('/user/login', 'POST', { identifier, password });
+            console.log("Login response: ", loginResponse);
+
             const userData = await apiRequest('/user/protected/me');
+            console.log("User data: ", userData);
+
             user.set(userData);
             await goto('/');
-        } catch (err) {
-            error = err.detail || 'Login failed';
+        } catch (e) {
+            console.error("Login error: " + e);
+            error = e.detail || e.message || "Login failed";
         }
 
         return false;

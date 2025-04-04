@@ -10,10 +10,25 @@ export async function apiRequest(endpoint, method = 'GET', data = null) {
     if (data) {
         options.body = JSON.stringify(data);
     }
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error);
+    console.log(`API request to ${method} ${url}`);
+
+    try {
+        const response = await fetch(url, options);
+        console.log('Response status: ', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('API error response: ', errorData);
+
+            const error = new Error(errorData.detail || "Request failed");
+            error.detail = errorData.detail || errorData.message || "Unknown error";
+            error.status = response.status;
+            error.data = errorData;
+            throw error;
+        }
+        return response.json();
+    } catch (err) {
+        console.error('API request failed: ${err.message}');
+        throw err;
     }
-    return response.json();
 }
