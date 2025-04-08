@@ -32,3 +32,12 @@ export async function apiRequest(endpoint, method = 'GET', data = null) {
         throw err;
     }
 }
+
+export async function refreshToken() {
+    try {
+        const data = await apiRequest('/user/protected/refresh', 'POST');
+        return data.token;
+    } catch (err) {
+        throw new Error('Token refresh failed: ' + (err.detail || err.message));
+    }
+}

@@ -4,6 +4,9 @@
     import {apiRequest} from "$lib/api.js";
     import Nav from "$lib/Nav.svelte";
     import {user} from "$lib/stores.js";
+    import {tokenExpiry} from "$lib/stores.js";
+
+    let refreshInterval;
 
     onMount(async () => {
         try {
@@ -19,7 +22,7 @@
     });
 </script>
 
-<Styles />
+<Styles/>
 
-<Nav />
-<slot />
+<Nav/>
+<slot/>
