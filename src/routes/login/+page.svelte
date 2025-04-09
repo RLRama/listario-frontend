@@ -2,7 +2,7 @@
     import {goto} from "$app/navigation";
     import {Alert, Button, Form, FormGroup, Input, Label} from "@sveltestrap/sveltestrap";
     import {apiRequest} from "$lib/api.js";
-    import {user} from "$lib/stores.js";
+    import {tokenExpiry, user} from "$lib/stores.js";
 
     let identifier = '';
     let password = '';
@@ -18,6 +18,7 @@
             console.log("User data: ", userData);
 
             user.set(userData);
+            tokenExpiry.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
             await goto('/');
         } catch (e) {
             console.error("Login error: " + e);
