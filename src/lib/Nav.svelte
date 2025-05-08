@@ -19,6 +19,9 @@
     <Nav class="ms-auto" navbar>
         {#if $user}
             <NavItem>
+                <NavLink href="/tasks">Tasks</NavLink>
+            </NavItem>
+            <NavItem>
                 <NavLink href="/profile">Profile</NavLink>
             </NavItem>
             <NavItem>

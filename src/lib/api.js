@@ -41,3 +41,45 @@ export async function refreshToken() {
         throw new Error('Token refresh failed: ' + (err.detail || err.message));
     }
 }
+
+export async function getTasks() {
+    try {
+        return await apiRequest('/tasks', 'GET');
+    } catch (err) {
+        throw new Error('Failed to get tasks: ' + (err.detail || err.message));
+    }
+}
+
+export async function getTask(id) {
+    try {
+        return await apiRequest(`/tasks/${id}`, 'GET');
+    } catch (err) {
+        throw new Error('Failed to get task: ' + (err.detail || err.message));
+    }
+}
+
+export async function createTask(taskData) {
+    try {
+        const response = await apiRequest('/tasks', 'POST', taskData);
+        return response.task;
+    } catch (err) {
+        throw new Error('Failed to create task: ' + (err.detail || err.message));
+    }
+}
+
+export async function updateTask(id, taskData) {
+    try {
+        const response = await apiRequest(`/tasks/${id}`, 'PUT', taskData);
+        return response.task;
+    } catch (err) {
+        throw new Error('Failed to update task: ' + (err.detail || err.message));
+    }
+}
+
+export async function deleteTask(id) {
+    try {
+        await apiRequest(`/tasks/${id}`, 'DELETE');
+    } catch (err) {
+        throw new Error('Failed to delete task: ' + (err.detail || err.message));
+    }
+}
