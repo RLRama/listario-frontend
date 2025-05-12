@@ -6,7 +6,6 @@
     import {user} from "$lib/stores.js";
     import {tokenExpiry} from "$lib/stores.js";
 
-    export const prerender = true;
 
     let refreshInterval;
 
