@@ -1,5 +1,5 @@
 export async function apiRequest(endpoint, method = 'GET', data = null) {
-    const url = `http://localhost:8080${endpoint}`;
+    const url = `${import.meta.env.VITE_API_URL}${endpoint}`;
     const options = {
         method,
         headers: {
