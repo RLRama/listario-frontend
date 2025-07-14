@@ -2,17 +2,31 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { UserResponse } from '$lib/types';
 
-const initialToken = browser ? window.localStorage.getItem('authToken') : null;
+function getTokensFromStorage() {
+    if (!browser) return { accessToken: null, refreshToken: null };
+    const accessToken = window.sessionStorage.getItem('accessToken');
+    const refreshToken = window.sessionStorage.getItem('refreshToken');
+    return { accessToken, refreshToken };
+}
 
-export const authToken = writable<string | null>(initialToken);
+export const accessToken = writable<string | null>(getTokensFromStorage().accessToken);
+export const refreshToken = writable<string | null>(getTokensFromStorage().refreshToken);
 export const user = writable<UserResponse | null>(null);
 
 if (browser) {
-    authToken.subscribe((token) => {
+    accessToken.subscribe((token) => {
         if (token) {
-            window.localStorage.setItem('authToken', token);
+            window.sessionStorage.setItem('accessToken', token);
         } else {
-            window.localStorage.removeItem('authToken');
+            window.sessionStorage.removeItem('accessToken');
+        }
+    });
+
+    refreshToken.subscribe((token) => {
+        if (token) {
+            window.sessionStorage.setItem('refreshToken', token);
+        } else {
+            window.sessionStorage.removeItem('refreshToken');
         }
     });
 }
