@@ -1,0 +1,204 @@
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import {
+        Button,
+        Card,
+        CardBody,
+        CardHeader,
+        CardTitle,
+        Form,
+        FormGroup,
+        Input,
+        Label,
+        ListGroup,
+        ListGroupItem,
+        Modal,
+        ModalBody,
+        ModalFooter,
+        ModalHeader,
+        Alert,
+        Spinner
+    } from '@sveltestrap/sveltestrap';
+    import { createTask, deleteTask, getTasks, updateTask } from '$lib/services/api';
+    import type { Task } from '$lib/types';
+
+    let tasks: Task[] = [];
+    let isLoading = true;
+    let error: string | null = null;
+
+    // For creating a new task
+    let newTitle = '';
+    let newContent = '';
+
+    // For editing a task
+    let isEditModalOpen = false;
+    let taskToEdit: Task | null = null;
+    let editTitle = '';
+    let editContent = '';
+
+    onMount(async () => {
+        await loadTasks();
+    });
+
+    async function loadTasks() {
+        isLoading = true;
+        error = null;
+        try {
+            tasks = await getTasks();
+        } catch (err: any) {
+            error = err.message || 'Failed to load tasks.';
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    async function handleCreateTask() {
+        if (!newTitle.trim()) return;
+        error = null;
+        try {
+            await createTask(newTitle, newContent);
+            newTitle = '';
+            newContent = '';
+            await loadTasks(); // Refresh list
+        } catch (err: any) {
+            error = err.message || 'Failed to create task.';
+        }
+    }
+
+    async function handleDeleteTask(id: number) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        error = null;
+        try {
+            await deleteTask(id);
+            await loadTasks(); // Refresh list
+        } catch (err: any) {
+            error = err.message || 'Failed to delete task.';
+        }
+    }
+
+    function openEditModal(task: Task) {
+        taskToEdit = task;
+        editTitle = task.title;
+        editContent = task.content;
+        isEditModalOpen = true;
+    }
+
+    function closeEditModal() {
+        isEditModalOpen = false;
+        taskToEdit = null;
+    }
+
+    async function handleUpdateTask() {
+        if (!taskToEdit) return;
+        error = null;
+        try {
+            await updateTask(taskToEdit.id, { title: editTitle, content: editContent });
+            closeEditModal();
+            await loadTasks(); // Refresh list
+        } catch (err: any) {
+            error = err.message || 'Failed to update task.';
+        }
+    }
+
+    async function toggleCompleted(task: Task) {
+        error = null;
+        try {
+            await updateTask(task.id, { completed: !task.completed });
+            await loadTasks(); // Refresh list
+        } catch (err: any) {
+            error = err.message || 'Failed to update task status.';
+        }
+    }
+</script>
+
+<svelte:head>
+    <title>My Tasks</title>
+</svelte:head>
+
+{#if error}
+    <Alert color="danger" dismissible on:close={() => (error = null)}/>
+{/if}
+
+<Card class="mb-4">
+    <CardHeader>
+        <CardTitle>Create New Task</CardTitle>
+    </CardHeader>
+    <CardBody>
+        <form on:submit|preventDefault={handleCreateTask}>
+            <FormGroup>
+                <Label for="newTitle">Title</Label>
+                <Input id="newTitle" bind:value={newTitle} placeholder="What needs to be done?" required />
+            </FormGroup>
+            <FormGroup>
+                <Label for="newContent">Content (Optional)</Label>
+                <Input type="textarea" id="newContent" bind:value={newContent} placeholder="Add more details..." />
+            </FormGroup>
+            <Button color="primary" type="submit">Add Task</Button>
+        </form>
+    </CardBody>
+</Card>
+
+<Card>
+    <CardHeader>
+        <CardTitle>My Tasks</CardTitle>
+    </CardHeader>
+    <CardBody>
+        {#if isLoading}
+            <div class="text-center">
+                <Spinner />
+                <p>Loading tasks...</p>
+            </div>
+        {:else if tasks.length === 0}
+            <p>You have no tasks yet. Add one above to get started!</p>
+        {:else}
+            <ListGroup>
+                {#each tasks as task (task.id)}
+                    <ListGroupItem class="d-flex justify-content-between align-items-center">
+                        <div class:text-decoration-line-through={task.completed} class:text-muted={task.completed}>
+                            <strong>{task.title}</strong>
+                            {#if task.content}<p class="mb-0 small">{task.content}</p>{/if}
+                        </div>
+                        <div>
+                            <Button
+                                    outline
+                                    color={task.completed ? 'secondary' : 'success'}
+                                    size="sm"
+                                    on:click={() => toggleCompleted(task)}
+                                    title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}>
+                                {task.completed ? 'Undo' : 'Complete'}
+                            </Button>
+                            <Button outline color="primary" size="sm" class="ms-2" on:click={() => openEditModal(task)}>
+                                Edit
+                            </Button>
+                            <Button outline color="danger" size="sm" class="ms-2" on:click={() => handleDeleteTask(task.id)}>
+                                Delete
+                            </Button>
+                        </div>
+                    </ListGroupItem>
+                {/each}
+            </ListGroup>
+        {/if}
+    </CardBody>
+</Card>
+
+{#if taskToEdit}
+    <Modal isOpen={isEditModalOpen} toggle={closeEditModal}>
+        <ModalHeader toggle={closeEditModal}>Edit Task</ModalHeader>
+        <ModalBody>
+            <form on:submit|preventDefault={handleUpdateTask}>
+                <FormGroup>
+                    <Label for="editTitle">Title</Label>
+                    <Input id="editTitle" bind:value={editTitle} required/>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="editContent">Content</Label>
+                    <Input type="textarea" id="editContent" bind:value={editContent} />
+                </FormGroup>
+            </form>
+        </ModalBody>
+        <ModalFooter>
+            <Button color="primary" on:click={handleUpdateTask}>Save Changes</Button>
+            <Button color="secondary" on:click={closeEditModal}>Cancel</Button>
+        </ModalFooter>
+    </Modal>
+{/if}

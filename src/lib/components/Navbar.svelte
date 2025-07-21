@@ -15,6 +15,10 @@
     <NavbarBrand href="/">Listario</NavbarBrand>
     <Nav class="ms-auto" navbar>
         {#if $accessToken}
+
+            <NavItem>
+                <NavLink href="/tasks">My tasks</NavLink>
+            </NavItem>
             <NavItem>
                 <NavLink href="/profile">{$user?.username || 'Profile'}</NavLink>
             </NavItem>

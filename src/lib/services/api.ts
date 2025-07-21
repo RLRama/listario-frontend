@@ -1,7 +1,7 @@
 import { accessToken, refreshToken, user } from '$lib/stores/auth';
 import { get } from 'svelte/store';
 import { goto } from '$app/navigation';
-import type { UserResponse } from '$lib/types';
+import type { UserResponse, Task } from '$lib/types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -97,7 +97,7 @@ async function send({ method, path, data, isRetry = false }: { method: string; p
     }
 }
 
-// --- API Functions ---
+// --- Auth & user API Functions ---
 
 export async function login(email: string, password: string): Promise<void> {
     const tokenPair = await send({
@@ -150,4 +150,33 @@ export async function updateProfile(username: string, email: string): Promise<Us
     });
     user.set(updatedUser);
     return updatedUser;
+}
+
+// --- Task API Functions ---
+
+export function getTasks(): Promise<Task[]> {
+    return send({ method: 'GET', path: 'tasks' });
+}
+
+export function createTask(title: string, content: string): Promise<Task> {
+    return send({
+        method: 'POST',
+        path: 'tasks',
+        data: { title, content }
+    });
+}
+
+export function updateTask(id: number, data: { title?: string; content?: string; completed?: boolean }): Promise<Task> {
+    return send({
+        method: 'PUT',
+        path: `tasks/${id}`,
+        data
+    });
+}
+
+export function deleteTask(id: number): Promise<void> {
+    return send({
+        method: 'DELETE',
+        path: `tasks/${id}`
+    });
 }
