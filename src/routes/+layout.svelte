@@ -5,7 +5,6 @@
 	import { onMount } from 'svelte';
 	import { Styles } from '@sveltestrap/sveltestrap';
 
-	// When the app loads, if a token exists in storage, fetch the user's profile
 	onMount(() => {
 		if ($accessToken && !$user) {
 			getProfile();

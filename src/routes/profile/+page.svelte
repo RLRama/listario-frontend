@@ -14,7 +14,6 @@
         ListGroupItem
     } from '@sveltestrap/sveltestrap';
 
-    // Initialize form fields from the user store
     let newUsername = $user?.username || '';
     let newEmail = $user?.email || '';
     let error: string | null = null;
