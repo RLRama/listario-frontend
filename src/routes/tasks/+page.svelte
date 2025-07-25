@@ -6,7 +6,6 @@
         CardBody,
         CardHeader,
         CardTitle,
-        Form,
         FormGroup,
         Input,
         Label,
@@ -26,11 +25,9 @@
     let isLoading = true;
     let error: string | null = null;
 
-    // For creating a new task
     let newTitle = '';
     let newContent = '';
 
-    // For editing a task
     let isEditModalOpen = false;
     let taskToEdit: Task | null = null;
     let editTitle = '';
@@ -116,7 +113,7 @@
 </svelte:head>
 
 {#if error}
-    <Alert color="danger" dismissible on:close={() => (error = null)}/>
+    <Alert color="danger" dismissible toggle={() => (error = null)}>{error}</Alert>
 {/if}
 
 <Card class="mb-4">
