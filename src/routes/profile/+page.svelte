@@ -31,6 +31,10 @@
     }
 </script>
 
+<svelte:head>
+    <title>My profile</title>
+</svelte:head>
+
 <Card>
     <CardHeader>
         <h1>My Profile</h1>

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import {
+        Alert,
         Button,
         Card,
         CardBody,
@@ -15,7 +16,6 @@
         ModalBody,
         ModalFooter,
         ModalHeader,
-        Alert,
         Spinner
     } from '@sveltestrap/sveltestrap';
     import { createTask, deleteTask, getTasks, updateTask } from '$lib/services/api';
@@ -28,7 +28,6 @@
     let newTitle = '';
     let newContent = '';
 
-    let isEditModalOpen = false;
     let taskToEdit: Task | null = null;
     let editTitle = '';
     let editContent = '';
@@ -56,7 +55,7 @@
             await createTask(newTitle, newContent);
             newTitle = '';
             newContent = '';
-            await loadTasks(); // Refresh list
+            await loadTasks();
         } catch (err: any) {
             error = err.message || 'Failed to create task.';
         }
@@ -67,7 +66,7 @@
         error = null;
         try {
             await deleteTask(id);
-            await loadTasks(); // Refresh list
+            await loadTasks();
         } catch (err: any) {
             error = err.message || 'Failed to delete task.';
         }
@@ -77,21 +76,19 @@
         taskToEdit = task;
         editTitle = task.title;
         editContent = task.content;
-        isEditModalOpen = true;
     }
 
     function closeEditModal() {
-        isEditModalOpen = false;
         taskToEdit = null;
     }
 
     async function handleUpdateTask() {
-        if (!taskToEdit) return;
+        if (!taskToEdit || !editTitle.trim()) return;
         error = null;
         try {
             await updateTask(taskToEdit.id, { title: editTitle, content: editContent });
             closeEditModal();
-            await loadTasks(); // Refresh list
+            await loadTasks();
         } catch (err: any) {
             error = err.message || 'Failed to update task.';
         }
@@ -100,8 +97,12 @@
     async function toggleCompleted(task: Task) {
         error = null;
         try {
-            await updateTask(task.id, { completed: !task.completed });
-            await loadTasks(); // Refresh list
+            await updateTask(task.id, {
+                title: task.title,
+                content: task.content,
+                completed: !task.completed
+            });
+            await loadTasks();
         } catch (err: any) {
             error = err.message || 'Failed to update task status.';
         }
@@ -109,7 +110,7 @@
 </script>
 
 <svelte:head>
-    <title>My Tasks</title>
+    <title>My tasks</title>
 </svelte:head>
 
 {#if error}
@@ -118,7 +119,7 @@
 
 <Card class="mb-4">
     <CardHeader>
-        <CardTitle>Create New Task</CardTitle>
+        <CardTitle>Create new task</CardTitle>
     </CardHeader>
     <CardBody>
         <form on:submit|preventDefault={handleCreateTask}>
@@ -127,7 +128,7 @@
                 <Input id="newTitle" bind:value={newTitle} placeholder="What needs to be done?" required />
             </FormGroup>
             <FormGroup>
-                <Label for="newContent">Content (Optional)</Label>
+                <Label for="newContent">Content (optional)</Label>
                 <Input type="textarea" id="newContent" bind:value={newContent} placeholder="Add more details..." />
             </FormGroup>
             <Button color="primary" type="submit">Add Task</Button>
@@ -137,7 +138,7 @@
 
 <Card>
     <CardHeader>
-        <CardTitle>My Tasks</CardTitle>
+        <CardTitle>My tasks</CardTitle>
     </CardHeader>
     <CardBody>
         {#if isLoading}
@@ -161,13 +162,20 @@
                                     color={task.completed ? 'secondary' : 'success'}
                                     size="sm"
                                     on:click={() => toggleCompleted(task)}
-                                    title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}>
+                                    title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
+                            >
                                 {task.completed ? 'Undo' : 'Complete'}
                             </Button>
                             <Button outline color="primary" size="sm" class="ms-2" on:click={() => openEditModal(task)}>
                                 Edit
                             </Button>
-                            <Button outline color="danger" size="sm" class="ms-2" on:click={() => handleDeleteTask(task.id)}>
+                            <Button
+                                    outline
+                                    color="danger"
+                                    size="sm"
+                                    class="ms-2"
+                                    on:click={() => handleDeleteTask(task.id)}
+                            >
                                 Delete
                             </Button>
                         </div>
@@ -179,13 +187,13 @@
 </Card>
 
 {#if taskToEdit}
-    <Modal isOpen={isEditModalOpen} toggle={closeEditModal}>
-        <ModalHeader toggle={closeEditModal}>Edit Task</ModalHeader>
+    <Modal isOpen={true} toggle={closeEditModal}>
+        <ModalHeader toggle={closeEditModal}>Edit task</ModalHeader>
         <ModalBody>
-            <form on:submit|preventDefault={handleUpdateTask}>
+            <form on:submit|preventDefault={handleUpdateTask} id="edit-task-form">
                 <FormGroup>
                     <Label for="editTitle">Title</Label>
-                    <Input id="editTitle" bind:value={editTitle} required/>
+                    <Input id="editTitle" bind:value={editTitle} required />
                 </FormGroup>
                 <FormGroup>
                     <Label for="editContent">Content</Label>
@@ -194,7 +202,7 @@
             </form>
         </ModalBody>
         <ModalFooter>
-            <Button color="primary" on:click={handleUpdateTask}>Save Changes</Button>
+            <Button color="primary" type="submit" form="edit-task-form">Save Changes</Button>
             <Button color="secondary" on:click={closeEditModal}>Cancel</Button>
         </ModalFooter>
     </Modal>

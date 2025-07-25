@@ -3,6 +3,10 @@
     import { Button, Card, CardBody, CardTitle, CardText } from '@sveltestrap/sveltestrap';
 </script>
 
+<svelte:head>
+    <title>Home</title>
+</svelte:head>
+
 <Card class="text-center">
     <CardBody>
         <CardTitle>
