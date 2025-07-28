@@ -1,44 +1,72 @@
-# Listario frontend
+# listario-frontend
 
-WIP SvelteKit web app for a simple task management API. README to be improved soon! Below's the default-generated README:
+This UI is a frontend SvelteKit app, built as a companion to an API-driven service ([listario-backend](https://github.com/RLRama/listario-backend)).
 
----
+# Tech stack
 
-# sv
+- TypeScript
+- SvelteKit/Svelte
+- SvelteStrap
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+# Features
 
-## Creating a project
+- Response UI (mobile + desktop)
 
-If you're seeing this, you've probably already done this step. Congrats!
+# Getting started
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Native setup
 
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Clone, move into directory and create your .env
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+git clone https://github.com/RLRama/listario-frontend.git
+cd listario-frontend
+cp .env.example .env
+nano .env # then fill with valid API route
 ```
 
-## Building
+2. You can either:
+   
+   * Start development server
+     
+     * ```bash
+       npm install
+       npm run dev # you can use bun instead
+       ```
 
-To create a production version of your app:
+   * Build a production version
+     
+     * ```bash
+       npm run build
+       npm run preview # preview the production build
+       ```
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
+4. Access the UI at http://localhost:5173/
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+   
+# Environment variables
+
+- See [.env.example](./.env.example)
+
+# Key takeaways
+
+- Built reactive UI with SvelteKit, Typescript and SvelteStrap
+- Learned how to manage the API contract from the frontend perspective
+
+# Roadmap
+
+- [x] Correct consumption of backend companion API
+- [x] Live deployment (on (Vercel)[https://listario.vercel.app/])
+- [ ] Night mode
+- [ ] i18n
+
+# License
+
+Project licensed under [MIT](./LICENSE) license.
+
+# Contact
+
+> Ramiro Ignacio Rios Lopez
+> 
+> [LinkedIn](https://www.linkedin.com/in/rlrama/) - [Email](mailto:rl.ramiro11@gmail.com) - [GitHub](https://github.com/RLRama) - [Personal website](https://rlrama.onrender.com/)
