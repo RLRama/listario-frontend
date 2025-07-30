@@ -57,7 +57,7 @@ nano .env # then fill with valid API route
 # Roadmap
 
 - [x] Correct consumption of backend companion API
-- [x] Live deployment (on (Vercel)[https://listario.vercel.app/])
+- [x] Live deployment (on [Vercel](https://listario.vercel.app/]))
 - [ ] Night mode
 - [ ] i18n
 
