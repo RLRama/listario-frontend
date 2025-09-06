@@ -28,7 +28,7 @@
     let newTitle = '';
     let newContent = '';
 
-    let taskToEdit: Task | null = null;
+    let editingTaskId: number | null = null;
     let editTitle = '';
     let editContent = '';
 
@@ -72,22 +72,23 @@
         }
     }
 
-    function openEditModal(task: Task) {
-        taskToEdit = task;
+    function startEditing(task: Task) {
+        editingTaskId = task.id;
         editTitle = task.title;
         editContent = task.content;
     }
 
-    function closeEditModal() {
-        taskToEdit = null;
+    function cancelEditing() {
+        editingTaskId = null;
     }
 
+
     async function handleUpdateTask() {
-        if (!taskToEdit || !editTitle.trim()) return;
+        if (!editingTaskId || !editTitle.trim()) return;
         error = null;
         try {
-            await updateTask(taskToEdit.id, { title: editTitle, content: editContent });
-            closeEditModal();
+            await updateTask(editingTaskId, { title: editTitle, content: editContent });
+            editingTaskId = null; // Exit editing mode on success
             await loadTasks();
         } catch (err: any) {
             error = err.message || 'Failed to update task.';
@@ -151,59 +152,54 @@
         {:else}
             <ListGroup>
                 {#each tasks as task (task.id)}
-                    <ListGroupItem class="d-flex justify-content-between align-items-center">
-                        <div class:text-decoration-line-through={task.completed} class:text-muted={task.completed}>
-                            <strong>{task.title}</strong>
-                            {#if task.content}<p class="mb-0 small">{task.content}</p>{/if}
-                        </div>
-                        <div>
-                            <Button
-                                    outline
-                                    color={task.completed ? 'secondary' : 'success'}
-                                    size="sm"
-                                    on:click={() => toggleCompleted(task)}
-                                    title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
-                            >
-                                {task.completed ? 'Undo' : 'Complete'}
-                            </Button>
-                            <Button outline color="primary" size="sm" class="ms-2" on:click={() => openEditModal(task)}>
-                                Edit
-                            </Button>
-                            <Button
-                                    outline
-                                    color="danger"
-                                    size="sm"
-                                    class="ms-2"
-                                    on:click={() => handleDeleteTask(task.id)}
-                            >
-                                Delete
-                            </Button>
-                        </div>
+                    <ListGroupItem>
+                        {#if editingTaskId === task.id}
+                            <form on:submit|preventDefault={handleUpdateTask}>
+                                <FormGroup>
+                                    <Input id="editTitle" bind:value={editTitle} required class="mb-2" />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Input type="textarea" id="editContent" bind:value={editContent} class="mb-2" />
+                                </FormGroup>
+                                <div>
+                                    <Button color="success" type="submit" size="sm">Save</Button>
+                                    <Button outline color="secondary" size="sm" class="ms-2" on:click={cancelEditing}>Cancel</Button>
+                                </div>
+                            </form>
+                        {:else}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class:text-decoration-line-through={task.completed} class:text-muted={task.completed}>
+                                    <strong>{task.title}</strong>
+                                    {#if task.content}<p class="mb-0 small">{task.content}</p>{/if}
+                                </div>
+                                <div>
+                                    <Button
+                                            outline
+                                            color={task.completed ? 'secondary' : 'success'}
+                                            size="sm"
+                                            on:click={() => toggleCompleted(task)}
+                                            title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
+                                    >
+                                        {task.completed ? 'Undo' : 'Complete'}
+                                    </Button>
+                                    <Button outline color="primary" size="sm" class="ms-2" on:click={() => startEditing(task)}>
+                                        Edit
+                                    </Button>
+                                    <Button
+                                            outline
+                                            color="danger"
+                                            size="sm"
+                                            class="ms-2"
+                                            on:click={() => handleDeleteTask(task.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        {/if}
                     </ListGroupItem>
                 {/each}
             </ListGroup>
         {/if}
     </CardBody>
 </Card>
-
-{#if taskToEdit}
-    <Modal isOpen={true} toggle={closeEditModal}>
-        <ModalHeader toggle={closeEditModal}>Edit task</ModalHeader>
-        <ModalBody>
-            <form on:submit|preventDefault={handleUpdateTask} id="edit-task-form">
-                <FormGroup>
-                    <Label for="editTitle">Title</Label>
-                    <Input id="editTitle" bind:value={editTitle} required />
-                </FormGroup>
-                <FormGroup>
-                    <Label for="editContent">Content</Label>
-                    <Input type="textarea" id="editContent" bind:value={editContent} />
-                </FormGroup>
-            </form>
-        </ModalBody>
-        <ModalFooter>
-            <Button color="primary" type="submit" form="edit-task-form">Save Changes</Button>
-            <Button color="secondary" on:click={closeEditModal}>Cancel</Button>
-        </ModalFooter>
-    </Modal>
-{/if}
