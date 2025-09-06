@@ -1,6 +1,6 @@
 <script lang="ts">
     import { user } from '$lib/stores/auth';
-    import { updateProfile } from '$lib/services/api';
+    import { updateProfile, updatePassword, logout } from '$lib/services/api';
     import {
         Button,
         FormGroup,
@@ -13,20 +13,50 @@
         ListGroup,
         ListGroupItem
     } from '@sveltestrap/sveltestrap';
+    import PasswordInput from "$lib/components/PasswordInput.svelte";
 
     let newUsername = $user?.username || '';
     let newEmail = $user?.email || '';
-    let error: string | null = null;
-    let message = '';
+    let profileError: string | null = null;
+    let profileMessage = '';
 
-    async function handleUpdate() {
-        error = null;
-        message = '';
+    let oldPassword = '';
+    let newPassword = '';
+    let confirmPassword = '';
+    let passwordError: string | null = null;
+    let passwordMessage = '';
+
+
+    async function handleUpdateProfile() {
+        profileError = null;
+        profileMessage = '';
         try {
             await updateProfile(newUsername, newEmail);
-            message = 'Profile updated successfully!';
+            profileMessage = 'Profile updated successfully!';
         } catch (err: any) {
-            error = err.error || 'Failed to update profile.';
+            profileError = err.error || 'Failed to update profile.';
+        }
+    }
+
+    async function handleUpdatePassword() {
+        passwordError = null;
+        passwordMessage = '';
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            passwordError = 'Password does not meet the requirements.';
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            passwordError = 'New passwords do not match.';
+            return;
+        }
+
+        try {
+            await updatePassword(oldPassword, newPassword);
+            await logout();
+        } catch (err: any) {
+            passwordError = err.error || 'Failed to update password.';
         }
     }
 </script>
@@ -54,21 +84,75 @@
     </CardBody>
 </Card>
 
-<h2 class="mt-4">Update Details</h2>
-<form on:submit|preventDefault={handleUpdate} class="mt-3">
-    {#if error}
-        <Alert color="danger">{error}</Alert>
-    {/if}
-    {#if message}
-        <Alert color="success">{message}</Alert>
-    {/if}
-    <FormGroup>
-        <Label for="username">Username</Label>
-        <Input id="username" type="text" bind:value={newUsername} placeholder="Enter new username" />
-    </FormGroup>
-    <FormGroup>
-        <Label for="email">Email</Label>
-        <Input id="email" type="email" bind:value={newEmail} placeholder="Enter new email" />
-    </FormGroup>
-    <Button color="primary" type="submit">Update Profile</Button>
-</form>
+<Card class="mt-4">
+    <CardHeader>
+        <h2>Update Details</h2>
+    </CardHeader>
+    <CardBody>
+        <form on:submit|preventDefault={handleUpdateProfile}>
+            {#if profileError}
+                <Alert color="danger">{profileError}</Alert>
+            {/if}
+            {#if profileMessage}
+                <Alert color="success">{profileMessage}</Alert>
+            {/if}
+            <FormGroup>
+                <Label for="username">Username</Label>
+                <Input id="username" type="text" bind:value={newUsername} />
+            </FormGroup>
+            <FormGroup>
+                <Label for="email">Email</Label>
+                <Input id="email" type="email" bind:value={newEmail} />
+            </FormGroup>
+            <Button color="primary" type="submit">Update Profile</Button>
+        </form>
+    </CardBody>
+</Card>
+
+<Card class="mt-4">
+    <CardHeader>
+        <h2>Update Password</h2>
+    </CardHeader>
+    <CardBody>
+        <Alert color="info">
+            For your security, you will be logged out after successfully updating your password.
+        </Alert>
+
+        <form on:submit|preventDefault={handleUpdatePassword}>
+            {#if passwordError}
+                <Alert color="danger">{passwordError}</Alert>
+            {/if}
+            <FormGroup>
+                <Label for="oldPassword">Current Password</Label>
+                <PasswordInput
+                        id="oldPassword"
+                        bind:value={oldPassword}
+                        placeholder="Enter your current password"
+                        required
+                />
+            </FormGroup>
+            <FormGroup>
+                <Label for="newPassword">New Password</Label>
+                <div class="form-text">
+                    Password requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
+                </div>
+                <PasswordInput
+                        id="newPassword"
+                        bind:value={newPassword}
+                        placeholder="Enter new password"
+                        required
+                />
+            </FormGroup>
+            <FormGroup>
+                <Label for="confirmPassword">Confirm New Password</Label>
+                <PasswordInput
+                        id="confirmPassword"
+                        bind:value={confirmPassword}
+                        placeholder="Confirm your new password"
+                        required
+                />
+            </FormGroup>
+            <Button color="primary" type="submit">Update Password and Log Out</Button>
+        </form>
+    </CardBody>
+</Card>

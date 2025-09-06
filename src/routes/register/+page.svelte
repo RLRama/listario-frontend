@@ -2,6 +2,7 @@
     import { register } from '$lib/services/api';
     import { goto } from '$app/navigation';
     import { Button, FormGroup, Label, Input, FormText, Alert } from '@sveltestrap/sveltestrap';
+    import PasswordInput from "$lib/components/PasswordInput.svelte";
 
     let username = '';
     let email = '';
@@ -44,7 +45,7 @@
     </FormGroup>
     <FormGroup>
         <Label for="password">Password</Label>
-        <Input id="password" type="password" bind:value={password} required minlength={8} />
+        <PasswordInput id="password" bind:value={password} required />
         <FormText>
             Password requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
         </FormText>

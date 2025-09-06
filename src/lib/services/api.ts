@@ -152,6 +152,17 @@ export async function updateProfile(username: string, email: string): Promise<Us
     return updatedUser;
 }
 
+export function updatePassword(oldPassword: string, newPassword: string): Promise<{ message: string }> {
+    return send({
+        method: 'PUT',
+        path: 'users/me/password',
+        data: {
+            old_password: oldPassword,
+            new_password: newPassword
+        }
+    });
+}
+
 // --- Task API Functions ---
 
 export function getTasks(): Promise<Task[]> {
